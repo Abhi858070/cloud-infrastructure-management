@@ -1,7 +1,7 @@
 # ☁️ Enterprise Multi-Tier Cloud Infrastructure Deployment
 
 ## 👤 Project Architect
-* **Name:** Himanshu Pathania
+* **Name:** Abhishek Thakur
 * **Academic Professional:** Final-Year Master of Computer Applications (MCA)
 * **Specialization:** Cloud Computing & DevOps Architecture
 
