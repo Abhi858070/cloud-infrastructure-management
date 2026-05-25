@@ -1,0 +1,177 @@
+# =========================================================================================
+# SYSTEM COMPONENT: LIVE ARCHITECTURAL MANUFACTURING CORE (MAIN CONTEXT)
+# PURPOSE: DIRECT DEPLOYMENT OF SECURE MULTI-TIER BUSINESS NETWORK RUNTIMES
+# =========================================================================================
+
+# 1. ORCHESTRATING THE ISOLATED CORPORATE NETWORK BOUNDARY (VPC)
+resource "aws_vpc" "corporate_network_boundary" {
+  cidr_block           = var.corporate_vpc_cidr_block
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  tags = {
+    Name              = "${var.infrastructure_meta_tag_prefix}-RootVPC"
+    OperationalStatus = "Active-Production-Layer"
+  }
+}
+
+# 2. SEPARATING PUBLIC INGRESS WEB TIER
+resource "aws_subnet" "public_web_subnet_tier" {
+  vpc_id                  = aws_vpc.corporate_network_boundary.id
+  cidr_block              = var.public_web_tier_subnet_cidr
+  availability_zone       = "${var.aws_environment_region}a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "${var.infrastructure_meta_tag_prefix}-PublicSubnet-Tier1"
+    Role = "Frontend-Web-Delivery"
+  }
+}
+
+# 3. SEPARATING PRIVATE PROTECTED BACKEND STORAGE TIER
+resource "aws_subnet" "private_storage_subnet_tier" {
+  vpc_id            = aws_vpc.corporate_network_boundary.id
+  cidr_block        = var.private_db_tier_subnet_cidr
+  availability_zone = "${var.aws_environment_region}b"
+
+  tags = {
+    Name = "${var.infrastructure_meta_tag_prefix}-PrivateSubnet-Tier2"
+    Role = "Isolated-Database-Backend"
+  }
+}
+
+# 4. DEPLOYING INTERNET GATEWAY ROUTING INTERFACE
+resource "aws_internet_gateway" "public_internet_access_port" {
+  vpc_id = aws_vpc.corporate_network_boundary.id
+
+  tags = {
+    Name = "${var.infrastructure_meta_tag_prefix}-CoreIGW"
+  }
+}
+
+# 5. BUILDING PUBLIC ROUTE TABLE METRICS
+resource "aws_route_table" "public_traffic_routing_table" {
+  vpc_id = aws_vpc.corporate_network_boundary.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.public_internet_access_port.id
+  }
+
+  tags = {
+    Name = "${var.infrastructure_meta_tag_prefix}-PublicRoutingLogic"
+  }
+}
+
+# 6. ASSOCIATING PUBLIC SUBNET HOOKS TO THE ROUTING TABLE
+resource "aws_route_table_association" "public_tier_network_link" {
+  subnet_id      = aws_subnet.public_web_subnet_tier.id
+  route_table_id = aws_route_table.public_traffic_routing_table.id
+}
+
+# 7. CYBERSECURITY PERIMETER CONTROL (STATEFUL SECURITY GROUPS FIREWALL)
+resource "aws_security_group" "enterprise_perimeter_firewall" {
+  name        = "abhishek-corporate-firewall-boundary"
+  description = "Advanced multi-port stateful traffic monitoring grid guarding internal application endpoints from unsolicited exterior exploitation attempts."
+  vpc_id      = aws_vpc.corporate_network_boundary.id
+
+  # INBOUND RULE 1: Secure Terminal Operations
+  ingress {
+    description = "Allow administrative encrypted terminal access via standard SSH port"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # INBOUND RULE 2: Worldwide Web Delivery
+  ingress {
+    description = "Allow worldwide hypertext network queries over unencrypted HTTP port"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # INBOUND RULE 3: Secure Transport Infrastructure
+  ingress {
+    description = "Allow encrypted data transaction validation over secure HTTPS protocol"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # OUTBOUND RULE: Complete Egress Communication Pipe
+  egress {
+    description = "Allow absolute internal outbound server telemetry requests to reach target external global networks"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.infrastructure_meta_tag_prefix}-NetworkFirewallWall"
+  }
+}
+
+# 8. COMPUTE WORKLOAD SERVER ORCHESTRATION WITH APPLICATION BOOTSTRAPPING
+resource "aws_instance" "corporate_production_host_node" {
+  ami                    = var.target_canonical_ubuntu_ami
+  instance_type          = var.compute_node_hardware_size
+  subnet_id              = aws_subnet.public_web_subnet_tier.id
+  vpc_security_group_ids = [aws_security_group.enterprise_perimeter_firewall.id]
+
+  # DYNAMIC USER DATA ENVELOPE: Autonomic Initialization script constructing a live landing portal
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo apt-get update -y
+              sudo apt-get install apache2 -y
+              sudo systemctl start apache2
+              sudo systemctl enable apache2
+              
+              cat <<HTML > /var/www/html/index.html
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                  <meta charset="UTF-8">
+                  <title>Enterprise Cloud Infrastructure Operations</title>
+                  <style>
+                      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 60px 20px; text-align: center; }
+                      .wrapper-box { background: #ffffff; max-width: 700px; margin: 0 auto; padding: 50px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.06); border-top: 8px solid #1e3a5f; }
+                      h1 { color: #1e3a5f; font-size: 32px; font-weight: 700; margin-bottom: 20px; }
+                      p { font-size: 16px; line-height: 1.7; color: #475569; margin-bottom: 30px; }
+                      .status-badge { background-color: #d1fae5; color: #065f46; padding: 8px 18px; border-radius: 30px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+                      .audit-log-metadata { text-align: left; background-color: #f1f5f9; border-left: 5px solid #0f172a; padding: 25px; margin-top: 40px; border-radius: 8px; font-family: monospace; font-size: 14px; line-height: 1.9; }
+                  </style>
+              </head>
+              <body>
+                  <div class="wrapper-box">
+                      <h1>Cloud Automation Engine Operational</h1>
+                      <p>This running node represents an automated live deployment executed programmatically via <strong>Infrastructure as Code (IaC) Architecture</strong>.</p>
+                      <span class="status-badge">System Health: Verified Stable</span>
+                      
+                      <div class="audit-log-metadata">
+                          <strong>[DEPLOYMENT MANIFEST METADATA LOG]</strong><br>
+                          &bull; PROJECT: Implementation of Cloud-Based Infrastructure in Business Operations<br>
+                          &bull; CHIEF ARCHITECT: Abhishek Thakur (MCA Final Year)<br>
+                          &bull; INSTITUTIONAL ALIGNMENT: Chandigarh University Online<br>
+                          &bull; AUTOMATION CORE: HashiCorp Terraform Provider Wrappers<br>
+                          &bull; ORCHESTRATION REGION: us-east-1a (AWS Virtual Cloud Center)
+                      </div>
+                  </div>
+              </body>
+              </html>
+              HTML
+              EOF
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name      = "${var.infrastructure_meta_tag_prefix}-CoreProductionServer"
+    Lifecycle = "Production-Workload-Tier"
+  }
+}

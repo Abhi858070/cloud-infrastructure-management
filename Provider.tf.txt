@@ -1,0 +1,36 @@
+# =========================================================================================
+# SYSTEM COMPONENT: PROVIDER ORCHESTRATION ENGINE
+# PROJECT TITLE: IMPLEMENTATION OF CLOUD-BASED INFRASTRUCTURE IN BUSINESS OPERATIONS
+# AUTHOR: ABHISHEK THAKUR (MCA FINAL YEAR) | CHANDIGARH UNIVERSITY ONLINE
+# =========================================================================================
+
+terraform {
+  # Enforcing strict version constraints to eliminate configuration drift in business ops
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
+    }
+  }
+}
+
+# Configuring the primary AWS Resource Manager with global tags auditing
+provider "aws" {
+  region = var.aws_environment_region
+
+  default_tags {
+    tags = {
+      ProjectID    = "CU-ONLINE-MCA-2026"
+      Engineer     = "Abhishek-Thakur"
+      Domain       = "Business-Operations-Automation"
+      Governance   = "Strict-ITIL-Compliance"
+      Orchestrator = "Terraform-IaC-Core"
+    }
+  }
+}

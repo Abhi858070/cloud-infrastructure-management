@@ -1,0 +1,46 @@
+# =========================================================================================
+# SYSTEM COMPONENT: ENTERPRISE PARAMETER CONFIGURATION MATRIX (VARIABLES)
+# PURPOSE: ELIMINATING HARDCODED STRINGS TO PROVIDE COMPLETE OPERATIONAL ELASTICITY
+# =========================================================================================
+
+variable "aws_environment_region" {
+  type        = string
+  default     = "us-east-1"
+  description = "The target Amazon Web Services geographic region where the corporate virtual private network boundary and compute infrastructure cluster will be programmatically orchestrated."
+}
+
+variable "corporate_vpc_cidr_block" {
+  type        = string
+  default     = "10.0.0.0/16"
+  description = "The root Classless Inter-Domain Routing (CIDR) block establishing the private IP range for the entire multi-tier business operations datacenter on the cloud."
+}
+
+variable "public_web_tier_subnet_cidr" {
+  type        = string
+  default     = "10.0.1.0/24"
+  description = "The isolated network segment dedicated for handling public ingress HTTP/HTTPS web application traffic, attached to route structures heading out via the Internet Gateway."
+}
+
+variable "private_db_tier_subnet_cidr" {
+  type        = string
+  default     = "10.0.2.0/24"
+  description = "Highly secure, isolated backend storage subnet tier isolated completely from public internet accessibility, dedicated to holding analytical logs and database runtimes."
+}
+
+variable "compute_node_hardware_size" {
+  type        = string
+  default     = "t2.micro"
+  description = "The virtualized hardware allocation matrix profile defining CPU processing units and random access memory caps assigned to the live web application host machine."
+}
+
+variable "target_canonical_ubuntu_ami" {
+  type        = string
+  default     = "ami-0c7217cdde317cfec"
+  description = "The Amazon Machine Image identifier pointing to a verified, stable release of Canonical Ubuntu Server 22.04 LTS optimized for long-term production operations."
+}
+
+variable "infrastructure_meta_tag_prefix" {
+  type        = string
+  default     = "Abhishek-Business-Ops"
+  description = "The standardization naming prefix appended programmatically to every infrastructure asset created by this IaC engine to streamline internal IT compliance audits."
+}
